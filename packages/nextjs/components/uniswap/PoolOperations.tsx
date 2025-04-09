@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { parseEther } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
+import { getContract, parseEther, parseUnits } from "viem";
+import { useAccount, useReadContract, useWalletClient, useWriteContract } from "wagmi";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 
 interface PoolOperationsProps {
@@ -14,6 +14,27 @@ interface PoolOperationsProps {
     symbol: string;
   };
 }
+
+// ERC20 ABI（balanceOf + approve）
+const ERC20_ABI = [
+  {
+    name: "balanceOf",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    name: "approve",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+];
 
 const PoolOperations = ({ poolAddress, token0, token1 }: PoolOperationsProps) => {
   const { address: connectedAddress } = useAccount();
@@ -31,6 +52,14 @@ const PoolOperations = ({ poolAddress, token0, token1 }: PoolOperationsProps) =>
   const { writeContract: addLiquidity } = useWriteContract();
   const { writeContract: removeLiquidity } = useWriteContract();
   const { writeContract: swapExactTokensForTokens } = useWriteContract();
+  const { writeContract: approveLP } = useWriteContract();
+
+  const { data: lpBalance } = useReadContract({
+    address: poolAddress as `0x${string}`,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: [connectedAddress],
+  }) as { data: bigint | undefined };
 
   const handleDeposit = async () => {
     if (!amount0 || !amount1 || !connectedAddress || !routerAddress) return;
@@ -124,11 +153,31 @@ const PoolOperations = ({ poolAddress, token0, token1 }: PoolOperationsProps) =>
   };
 
   const handleRedeem = async () => {
-    if (!amount0 || !amount1 || !connectedAddress || !routerAddress) return;
-
+    if (!amount0 || !connectedAddress || !routerAddress || !lpBalance) return;
     setLoading(true);
     try {
       const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+
+      // Convert user input to LP token amount
+      const redeemAmount = parseUnits(amount0, 18);
+
+      // Check if user has enough LP tokens
+      if (redeemAmount > lpBalance) {
+        throw new Error("Not enough LP tokens to redeem");
+      }
+
+      // Approve router to spend LP tokens
+      await approveLP({
+        address: poolAddress as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: "approve",
+        args: [routerAddress, redeemAmount],
+      });
+
+      // Wait for approval
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      // Remove liquidity
       await removeLiquidity({
         address: routerAddress,
         abi: [
@@ -155,9 +204,9 @@ const PoolOperations = ({ poolAddress, token0, token1 }: PoolOperationsProps) =>
         args: [
           token0.address,
           token1.address,
-          parseEther(amount0), // Using amount0 as liquidity amount
-          (parseEther(amount0) * BigInt(95)) / BigInt(100), // 5% slippage
-          (parseEther(amount1) * BigInt(95)) / BigInt(100), // 5% slippage
+          redeemAmount,
+          parseEther("0"), // 0% slippage
+          parseEther("0"), // 0% slippage
           connectedAddress,
           BigInt(deadline),
         ],

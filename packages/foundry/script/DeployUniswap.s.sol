@@ -15,104 +15,46 @@ contract DeployMyContract is Script {
     address constant WETH_MUMBAI = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889;
     address constant WETH_FUJI = 0xd00ae08403B9bbb9124bB305C09058E32C39A48c;
 
-    // Struct to store token information
-    struct TokenInfo {
-        string name;
-        string symbol;
-        address tokenAddress;
-    }
-
-    // Struct to store pair information
-    struct PairInfo {
-        address token0;
-        address token1;
-        address pairAddress;
-    }
-
-    function run() external {
-        // Get the WETH address based on the current network
-        address wethAddress;
+    function getWethAddress() public view returns (address) {
         uint256 chainId = block.chainid;
-        
-        if (chainId == 5) { // Goerli
-            wethAddress = WETH_GOERLI;
-        } else if (chainId == 11155111) { // Sepolia
-            wethAddress = WETH_SEPOLIA;
-        } else if (chainId == 80001) { // Mumbai
-            wethAddress = WETH_MUMBAI;
-        } else if (chainId == 43113) { // Fuji
-            wethAddress = WETH_FUJI;
-        } else {
-            // For local development, deploy a new WETH
-            WETH9 weth = new WETH9();
-            wethAddress = address(weth);
-            console.log("WETH deployed at:", wethAddress);
-        }
-        
-        // Get the deployer address
-        address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
-        console.log("Deployer address:", deployer);
-        
-        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
-        
-        // Deploy Factory
-        UniswapV2Factory factory = new UniswapV2Factory(deployer);
-        
-        // Deploy Router with WETH address
-        UniswapV2Router02 router = new UniswapV2Router02(address(factory), wethAddress);
+        if (chainId == 5) return WETH_GOERLI;
+        if (chainId == 11155111) return WETH_SEPOLIA;
+        if (chainId == 80001) return WETH_MUMBAI;
+        if (chainId == 43113) return WETH_FUJI;
+        return address(0);
+    }
 
-        // Create tokens
-        TokenInfo[] memory tokens = new TokenInfo[](5);
-        tokens[0] = TokenInfo("Token A", "TKNA", address(new TestERC20("Token A", "TKNA", 18)));
-        tokens[1] = TokenInfo("Token B", "TKNB", address(new TestERC20("Token B", "TKNB", 18)));
-        tokens[2] = TokenInfo("Token C", "TKNC", address(new TestERC20("Token C", "TKNC", 18)));
-        tokens[3] = TokenInfo("Token D", "TKND", address(new TestERC20("Token D", "TKND", 18)));
-        tokens[4] = TokenInfo("Token E", "TKNE", address(new TestERC20("Token E", "TKNE", 18)));
+    function createAndSetupTokens() internal returns (TestERC20[] memory) {
+        TestERC20[] memory tokens = new TestERC20[](5);
+        tokens[0] = new TestERC20("Token A", "TKNA", 18);
+        tokens[1] = new TestERC20("Token B", "TKNB", 18);
+        tokens[2] = new TestERC20("Token C", "TKNC", 18);
+        tokens[3] = new TestERC20("Token D", "TKND", 18);
+        tokens[4] = new TestERC20("Token E", "TKNE", 18);
+        return tokens;
+    }
 
-        // Create pairs
-        PairInfo[] memory pairs = new PairInfo[](5);
-        pairs[0] = PairInfo(tokens[0].tokenAddress, tokens[1].tokenAddress, factory.createPair(tokens[0].tokenAddress, tokens[1].tokenAddress));
-        pairs[1] = PairInfo(tokens[1].tokenAddress, tokens[2].tokenAddress, factory.createPair(tokens[1].tokenAddress, tokens[2].tokenAddress));
-        pairs[2] = PairInfo(tokens[2].tokenAddress, tokens[3].tokenAddress, factory.createPair(tokens[2].tokenAddress, tokens[3].tokenAddress));
-        pairs[3] = PairInfo(tokens[3].tokenAddress, tokens[4].tokenAddress, factory.createPair(tokens[3].tokenAddress, tokens[4].tokenAddress));
-        pairs[4] = PairInfo(tokens[0].tokenAddress, tokens[4].tokenAddress, factory.createPair(tokens[0].tokenAddress, tokens[4].tokenAddress));
+    function createPairs(UniswapV2Factory factory, TestERC20[] memory tokens) internal returns (address[] memory) {
+        address[] memory pairs = new address[](5);
+        pairs[0] = factory.createPair(address(tokens[0]), address(tokens[1]));
+        pairs[1] = factory.createPair(address(tokens[1]), address(tokens[2]));
+        pairs[2] = factory.createPair(address(tokens[2]), address(tokens[3]));
+        pairs[3] = factory.createPair(address(tokens[3]), address(tokens[4]));
+        pairs[4] = factory.createPair(address(tokens[0]), address(tokens[4]));
+        return pairs;
+    }
 
-        // Log all deployed addresses
-        console.log("\n=== Deployed Contract Addresses ===");
-        console.log("WETH address:", wethAddress);
-        console.log("Factory address:", address(factory));
-        console.log("Router address:", address(router));
-
-        console.log("\n=== Token Addresses ===");
-        for (uint i = 0; i < tokens.length; i++) {
-            console.log("%s (%s): %s", tokens[i].name, tokens[i].symbol, tokens[i].tokenAddress);
-        }
-
-        console.log("\n=== Trading Pairs ===");
+    function setupInitialLiquidity(
+        UniswapV2Router02 router,
+        TestERC20[] memory tokens,
+        address[] memory pairs,
+        address deployer
+    ) internal {
+        uint amountDesired = 5000 * 10**18;
         for (uint i = 0; i < pairs.length; i++) {
-            console.log("Pair %d: %s - %s", i + 1, pairs[i].token0, pairs[i].token1);
-            console.log("Pair address:", pairs[i].pairAddress);
-        }
-
-        // Mint tokens to deployer
-        // for (uint i = 0; i < tokens.length; i++) {
-        //     TestERC20(tokens[i].tokenAddress).mint(deployer, 10000 * 10**18);
-        // }
-
-        // Approve router to spend tokens
-        console.log("\n=== Approving Router ===");
-        for (uint i = 0; i < tokens.length; i++) {
-            TestERC20(tokens[i].tokenAddress).approve(address(router), type(uint256).max);
-            console.log("Approved %s for router", tokens[i].name);
-        }
-
-        // Add liquidity to pairs
-        console.log("\n=== Adding Liquidity to Pairs ===");
-        for (uint i = 0; i < pairs.length; i++) {
-            uint amountDesired = 5000 * 10**18;
             router.addLiquidity(
-                pairs[i].token0,
-                pairs[i].token1,
+                address(tokens[i]),
+                address(tokens[(i + 1) % tokens.length]),
                 amountDesired,
                 amountDesired,
                 amountDesired * 95 / 100,
@@ -120,16 +62,116 @@ contract DeployMyContract is Script {
                 deployer,
                 block.timestamp + 1800
             );
-            console.log("Added liquidity to pair %d", i + 1);
+        }
+    }
+
+    function testSwap(
+        UniswapV2Router02 router,
+        TestERC20 token0,
+        TestERC20 token1,
+        address deployer
+    ) internal {
+        uint swapAmount = 100 * 10**18;
+        address[] memory path = new address[](2);
+        path[0] = address(token0);
+        path[1] = address(token1);
+        
+        uint balanceBefore0 = token0.balanceOf(deployer);
+        uint balanceBefore1 = token1.balanceOf(deployer);
+        
+        router.swapExactTokensForTokens(
+            swapAmount,
+            0,
+            path,
+            deployer,
+            block.timestamp + 1800
+        );
+        
+        console.log("Swap Test Results:");
+        console.log("Token0 spent:", (balanceBefore0 - token0.balanceOf(deployer)) / 10**18);
+        console.log("Token1 received:", (token1.balanceOf(deployer) - balanceBefore1) / 10**18);
+    }
+
+    function testRedeem(
+        UniswapV2Router02 router,
+        TestERC20 token0,
+        TestERC20 token1,
+        address pair,
+        address deployer
+    ) internal {
+        uint liquidity = IERC20(pair).balanceOf(deployer);
+        uint redeemAmount = liquidity / 4;
+        
+        uint balanceBefore0 = token0.balanceOf(deployer);
+        uint balanceBefore1 = token1.balanceOf(deployer);
+        
+        IERC20(pair).approve(address(router), redeemAmount);
+        
+        router.removeLiquidity(
+            address(token0),
+            address(token1),
+            redeemAmount,
+            0,
+            0,
+            deployer,
+            block.timestamp + 1800
+        );
+        
+        console.log("Redeem Test Results:");
+        console.log("Token0 received:", (token0.balanceOf(deployer) - balanceBefore0) / 10**18);
+        console.log("Token1 received:", (token1.balanceOf(deployer) - balanceBefore1) / 10**18);
+        console.log("Liquidity tokens burned:", redeemAmount / 10**18);
+    }
+
+    function run() external {
+        address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
+        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
+
+        // Deploy WETH if needed
+        address wethAddress = getWethAddress();
+        if (wethAddress == address(0)) {
+            WETH9 weth = new WETH9();
+            wethAddress = address(weth);
         }
 
-        // Log final balances
-        console.log("\n=== Final Balances ===");
+        // Deploy core contracts
+        UniswapV2Factory factory = new UniswapV2Factory(deployer);
+        UniswapV2Router02 router = new UniswapV2Router02(address(factory), wethAddress);
+
+        // Create and setup tokens
+        TestERC20[] memory tokens = createAndSetupTokens();
         for (uint i = 0; i < tokens.length; i++) {
-            console.log("%s balance:", tokens[i].name);
-            console.log("Deployer balance:", TestERC20(tokens[i].tokenAddress).balanceOf(deployer));
-            console.log("Total supply:", TestERC20(tokens[i].tokenAddress).totalSupply());
+            // tokens[i].mint(deployer, 10000 * 10**18);
+            tokens[i].approve(address(router), type(uint256).max);
         }
+
+        // Create pairs
+        address[] memory pairs = createPairs(factory, tokens);
+
+        // Log addresses
+        console.log("\n=== Deployed Contract Addresses ===");
+        console.log("WETH address:", wethAddress);
+        console.log("Factory address:", address(factory));
+        console.log("Router address:", address(router));
+
+        console.log("\n=== Token Addresses ===");
+        for (uint i = 0; i < tokens.length; i++) {
+            console.log("%s (%s): %s", tokens[i].name(), tokens[i].symbol(), address(tokens[i]));
+        }
+
+        console.log("\n=== Trading Pairs ===");
+        for (uint i = 0; i < pairs.length; i++) {
+            console.log("Pair %d: %s - %s", i + 1, pairs[i], pairs[(i + 1) % pairs.length]);
+        }
+
+        // Add initial liquidity
+        setupInitialLiquidity(router, tokens, pairs, deployer);
+
+        // Test swap
+        testSwap(router, tokens[0], tokens[1], deployer);
+
+        // Test redeem
+        testRedeem(router, tokens[0], tokens[1], pairs[0], deployer);
 
         vm.stopBroadcast();
     }

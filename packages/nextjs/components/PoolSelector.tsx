@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PoolOperations from "./uniswap/PoolOperations";
 import { formatEther } from "viem";
-import { useAccount, useContractRead } from "wagmi";
+import { useAccount, useBlockNumber, useContractRead } from "wagmi";
 import { pools } from "~~/configs/pools";
 
 interface Reserves {
@@ -39,13 +39,15 @@ const PAIR_ABI = [
 const PoolSelector = () => {
   const [selectedPool, setSelectedPool] = useState(pools[0]);
   const { address: userAddress } = useAccount();
+  const { data: blockNumber } = useBlockNumber({ watch: true });
 
   // Read reserves from the selected pool
-  const { data: reserves } = useContractRead({
+  const { data: reserves, refetch: refetchReserves } = useContractRead({
     address: selectedPool.address as `0x${string}`,
     abi: PAIR_ABI,
     functionName: "getReserves",
-  }) as { data: Reserves | undefined };
+    blockNumber: blockNumber,
+  }) as { data: Reserves | undefined; refetch: () => Promise<any> };
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -56,6 +58,11 @@ const PoolSelector = () => {
       maximumFractionDigits: 2,
     });
   };
+
+  // Refresh reserves when block number changes
+  useEffect(() => {
+    refetchReserves();
+  }, [blockNumber, refetchReserves]);
 
   return (
     <div className="flex flex-col gap-6 p-6 bg-white rounded-3xl shadow-lg max-w-3xl mx-auto">

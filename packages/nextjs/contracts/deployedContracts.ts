@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     YourContract: {
-      address: "0xe1aa25618fa0c7a1cfdab5d6b456af611873b629",
+      address: "0xa15bb66138824a1c7167f5e85b957d04dd34e468",
       abi: [
         {
           type: "constructor",
@@ -148,11 +148,253 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744238616.json",
+      deploymentFile: "run-1744239946.json",
+      deploymentScript: "Deploy.s.sol",
+    },
+    WETH9: {
+      address: "0xd53aa20bf50628a4dc635e432eaeb899cf4f1300",
+      abi: [
+        {
+          type: "receive",
+          stateMutability: "payable",
+        },
+        {
+          type: "function",
+          name: "allowance",
+          inputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "approve",
+          inputs: [
+            {
+              name: "guy",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "wad",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "balanceOf",
+          inputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "decimals",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint8",
+              internalType: "uint8",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "deposit",
+          inputs: [],
+          outputs: [],
+          stateMutability: "payable",
+        },
+        {
+          type: "function",
+          name: "name",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "symbol",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "totalSupply",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "transfer",
+          inputs: [
+            {
+              name: "dst",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "wad",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "transferFrom",
+          inputs: [
+            {
+              name: "src",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "dst",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "wad",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "withdraw",
+          inputs: [
+            {
+              name: "wad",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "event",
+          name: "Deposit",
+          inputs: [
+            {
+              name: "dst",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "wad",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Withdrawal",
+          inputs: [
+            {
+              name: "src",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "wad",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+      ],
+      inheritedFunctions: {},
+      deploymentFile: "run-1744239946.json",
       deploymentScript: "Deploy.s.sol",
     },
     UniswapV2Factory: {
-      address: "0x9528335f86cd55dc446acc17c6bd6890224dab60",
+      address: "0xbf5ff1a6ceeada8a6cc0fe678793b4df8e9db67d",
       abi: [
         {
           type: "constructor",
@@ -330,11 +572,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744238616.json",
+      deploymentFile: "run-1744239946.json",
       deploymentScript: "Deploy.s.sol",
     },
     UniswapV2Router02: {
-      address: "0x50e6eff490830221757f4008386276b5a74233c2",
+      address: "0x3f3e6e2d8367b9fb93b0a4fb7c480006d48b222b",
       abi: [
         {
           type: "constructor",
@@ -1309,11 +1551,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744238616.json",
+      deploymentFile: "run-1744239946.json",
       deploymentScript: "Deploy.s.sol",
     },
     TestERC20: {
-      address: "0xdb5185bd29676821ec8d1a867905a34a6f64828d",
+      address: "0x7caed286b41df65bd6c03d0cb02629487ddfe234",
       abi: [
         {
           type: "constructor",
@@ -1578,7 +1820,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744238616.json",
+      deploymentFile: "run-1744239946.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

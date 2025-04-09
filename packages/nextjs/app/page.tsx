@@ -137,7 +137,7 @@ const Home: NextPage = () => {
         </div>
 
         {/* Add Liquidity Section */}
-        <div className="mt-8 p-6 bg-base-200 rounded-xl">
+        {/* <div className="mt-8 p-6 bg-base-200 rounded-xl">
           <h2 className="text-2xl font-bold mb-4">Add Liquidity</h2>
           <div className="space-y-4">
             <div>
@@ -190,7 +190,7 @@ const Home: NextPage = () => {
               {loading ? "Processing..." : "Add Liquidity"}
             </button>
           </div>
-        </div>
+        </div> */}
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
           <div className="flex justify-center items-center gap-12 flex-col md:flex-row">

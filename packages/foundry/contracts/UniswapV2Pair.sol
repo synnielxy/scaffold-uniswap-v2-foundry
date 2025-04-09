@@ -98,42 +98,31 @@ contract UniswapV2Pair is UniswapV2ERC20 {
 
     // this low-level function should be called from a contract which performs important safety checks
     function mint(address to) external lock returns (uint liquidity) {
-        console.log("mint 0");
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         uint balance0 = IERC20(token0).balanceOf(address(this));
         uint balance1 = IERC20(token1).balanceOf(address(this));
-        console.log("mint 1");
-
+        
         uint amount0 = balance0 - _reserve0;
         uint amount1 = balance1 - _reserve1;
 
         bool feeOn = _mintFee(_reserve0, _reserve1);
-        console.log("mint 2");
 
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         if (_totalSupply == 0) {
-            console.log("mint 3");
 
             liquidity = Math.sqrt(amount0 * amount1) - MINIMUM_LIQUIDITY;
-            console.log("mint 3.5");
 
             _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
-            console.log("mint 4");
-
+            
         } else {
-            console.log("mint 5");
-
+            
             liquidity = Math.min(amount0 * _totalSupply / _reserve0, amount1 * _totalSupply / _reserve1);
         }
-        console.log("mint 6");
-
+        
         require(liquidity > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED');
         _mint(to, liquidity);
-        console.log("mint 7");
-
 
         _update(balance0, balance1, _reserve0, _reserve1);
-        console.log("mint 8");
 
         if (feeOn) kLast = uint(reserve0) * reserve1; // reserve0 and reserve1 are up-to-date
     }

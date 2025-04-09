@@ -7,7 +7,6 @@ library TransferHelper {
     function safeApprove(address token, address to, uint value) internal {
         // bytes4(keccak256(bytes('approve(address,uint256)')));
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
-        console.log("Approve success:", success);
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: APPROVE_FAILED');
     }
 
@@ -19,23 +18,16 @@ library TransferHelper {
 
     function safeTransferFrom(address token, address from, address to, uint value) internal {
         // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
-        console.log("Token address:", token);
-        console.log("From address:", from);
-        console.log("To address:", to);
-        console.log("Value:", value);
 
         // 检查授权额度
         uint allowance = IERC20(token).allowance(from, msg.sender);
-        console.log("Current allowance:", allowance);
         // 检查余额
         uint balance = IERC20(token).balanceOf(from);
-        console.log("Current balance:", balance);
         // 检查地址是否为合约
         uint size;
         assembly {
             size := extcodesize(token)
         }
-        console.log("Is contract:", size > 0);
 
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: TRANSFER_FROM_FAILED');
