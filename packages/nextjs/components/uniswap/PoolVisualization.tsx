@@ -29,12 +29,17 @@ const PoolVisualization: React.FC<PoolVisualizationProps> = ({
   const formatReserve = (reserve: string, decimals = 18) => {
     if (!reserve) return "0";
     try {
+      // If the reserve is already in human-readable format (has no decimals or is already formatted)
+      if (!reserve.includes(".") && reserve.length < 20) {
+        return reserve;
+      }
+
       // Handle the case where reserve is already a decimal string
       if (reserve.includes(".")) {
         return reserve;
       }
 
-      // If it's a whole number string, format it with decimals
+      // If it's a raw number string with decimals, format it
       const amount = BigInt(reserve);
       const divisor = BigInt(10) ** BigInt(decimals);
       const integerPart = amount / divisor;
@@ -50,10 +55,8 @@ const PoolVisualization: React.FC<PoolVisualizationProps> = ({
       return reserve;
     }
   };
-
   const humanizedReserve0 = formatReserve(reserves[0], token0.decimals);
   const humanizedReserve1 = formatReserve(reserves[1], token1.decimals);
-
   return (
     <div className="bg-base-100 p-6 rounded-xl shadow-md">
       <h3 className="text-xl font-bold mb-4 flex justify-between items-center">

@@ -39,14 +39,11 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
       try {
         // Get the current block number
         const currentBlock = await publicClient.getBlockNumber();
-        console.log("Current block:", currentBlock);
 
         // Query all blocks from the beginning
         const fromBlock = BigInt(0);
-        console.log("Querying blocks from:", fromBlock, "to:", currentBlock);
 
         // Get logs for Swap events
-        console.log("Getting logs for pool address:", poolAddress);
         const logs = await publicClient.getLogs({
           address: poolAddress,
           fromBlock,
@@ -55,15 +52,6 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
             "event Swap(address indexed sender, uint amount0In, uint amount1In, uint amount0Out, uint amount1Out, address indexed to)",
           ),
         });
-        // const myBlock = await publicClient.getBlock({
-        //   blockNumber: 81n,
-        //   includeTransactions: true, // ⬅️ 加上这个才能看到交易详情
-        // });
-
-        // console.log("Block 81 txs:", myBlock.transactions);
-
-        console.log("Found swap logs:", logs.length);
-        console.log("Raw logs:", logs);
 
         const events = await Promise.all(
           logs.map(async log => {
@@ -87,10 +75,8 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
                 functionName: "getReserves",
                 blockNumber: log.blockNumber,
               });
-              console.log("Reserves at block", log.blockNumber, ":", reserves);
 
               const args = log.args;
-              console.log("Event args:", args);
 
               if (!args) {
                 console.log("No args found in log");
@@ -120,7 +106,6 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
         );
 
         const validEvents = events.filter((event): event is SwapEvent => event !== null);
-        console.log("Valid events:", validEvents);
         setSwapEvents(validEvents);
       } catch (error) {
         console.error("Error fetching swap events:", error);
