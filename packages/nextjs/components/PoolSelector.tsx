@@ -183,7 +183,7 @@ const PoolSelector = () => {
           reserves={[formatReserves(reserves[0]), formatReserves(reserves[1])]}
           activeTab={activeTab}
           swapFromToken="token0"
-          poolAddress={selectedPool.address}
+          poolAddress={selectedPool.address as `0x${string}`}
         />
       )}
     </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import PoolReservesChart from "./PoolReservesChart";
+import SwapPriceHistoryChart from "./SwapPriceHistoryChart";
 
 interface TokenInfo {
   address: string;
@@ -14,10 +15,16 @@ interface PoolVisualizationProps {
   activeTab: "deposit" | "redeem" | "swap";
   swapFromToken: "token0" | "token1";
   isLoading?: boolean;
-  poolAddress: string;
+  poolAddress: `0x${string}`;
 }
 
-const PoolVisualization: React.FC<PoolVisualizationProps> = ({ token0, token1, reserves, isLoading = false }) => {
+const PoolVisualization: React.FC<PoolVisualizationProps> = ({
+  token0,
+  token1,
+  reserves,
+  isLoading = false,
+  poolAddress,
+}) => {
   // Format reserves for display - convert from raw amounts to humanized amounts
   const formatReserve = (reserve: string, decimals = 18) => {
     if (!reserve) return "0";
@@ -72,6 +79,14 @@ const PoolVisualization: React.FC<PoolVisualizationProps> = ({ token0, token1, r
           reserve0={humanizedReserve0}
           reserve1={humanizedReserve1}
         />
+      </div>
+
+      <div className="mb-6">
+        <h4 className="text-lg mb-2">Swap Price History</h4>
+        <p className="text-sm text-base-content/70 mb-4">
+          This chart shows the distribution of execution prices from past swaps in the pool.
+        </p>
+        <SwapPriceHistoryChart token0Symbol={token0.symbol} token1Symbol={token1.symbol} poolAddress={poolAddress} />
       </div>
 
       <div className="text-sm">
