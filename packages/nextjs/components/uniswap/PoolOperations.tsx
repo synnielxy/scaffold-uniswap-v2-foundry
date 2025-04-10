@@ -13,6 +13,8 @@ interface PoolOperationsProps {
     address: string;
     symbol: string;
   };
+  activeTab: "deposit" | "redeem" | "swap";
+  onTabChange: (tab: "deposit" | "redeem" | "swap") => void;
 }
 
 // ERC20 ABI（balanceOf + approve）
@@ -36,9 +38,8 @@ const ERC20_ABI = [
   },
 ];
 
-const PoolOperations = ({ poolAddress, token0, token1 }: PoolOperationsProps) => {
+const PoolOperations = ({ poolAddress, token0, token1, activeTab, onTabChange }: PoolOperationsProps) => {
   const { address: connectedAddress } = useAccount();
-  const [activeTab, setActiveTab] = useState<"deposit" | "redeem" | "swap">("deposit");
   const [amount0, setAmount0] = useState("");
   const [amount1, setAmount1] = useState("");
   const [loading, setLoading] = useState(false);
@@ -286,16 +287,13 @@ const PoolOperations = ({ poolAddress, token0, token1 }: PoolOperationsProps) =>
   return (
     <div className="bg-base-200 p-6 rounded-xl shadow-md">
       <div className="tabs tabs-boxed mb-6">
-        <button
-          className={`tab ${activeTab === "deposit" ? "tab-active" : ""}`}
-          onClick={() => setActiveTab("deposit")}
-        >
+        <button className={`tab ${activeTab === "deposit" ? "tab-active" : ""}`} onClick={() => onTabChange("deposit")}>
           Deposit
         </button>
-        <button className={`tab ${activeTab === "redeem" ? "tab-active" : ""}`} onClick={() => setActiveTab("redeem")}>
+        <button className={`tab ${activeTab === "redeem" ? "tab-active" : ""}`} onClick={() => onTabChange("redeem")}>
           Redeem
         </button>
-        <button className={`tab ${activeTab === "swap" ? "tab-active" : ""}`} onClick={() => setActiveTab("swap")}>
+        <button className={`tab ${activeTab === "swap" ? "tab-active" : ""}`} onClick={() => onTabChange("swap")}>
           Swap
         </button>
       </div>

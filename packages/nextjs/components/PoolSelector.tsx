@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import PoolOperations from "./uniswap/PoolOperations";
+import PoolVisualization from "./uniswap/PoolVisualization";
 import { formatEther } from "viem";
 import { useAccount, useBlockNumber, useContractRead } from "wagmi";
 import { pools } from "~~/configs/pools";
@@ -38,6 +39,7 @@ const PAIR_ABI = [
 
 const PoolSelector = () => {
   const [selectedPool, setSelectedPool] = useState(pools[0]);
+  const [activeTab, setActiveTab] = useState<"deposit" | "redeem" | "swap">("deposit");
   const { address: userAddress } = useAccount();
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
@@ -54,9 +56,7 @@ const PoolSelector = () => {
   };
 
   const formatReserves = (amount: bigint) => {
-    return parseFloat(formatEther(amount)).toLocaleString(undefined, {
-      maximumFractionDigits: 2,
-    });
+    return parseFloat(formatEther(amount)).toString();
   };
 
   // Refresh reserves when block number changes
@@ -165,7 +165,27 @@ const PoolSelector = () => {
           address: selectedPool.token1.address,
           symbol: selectedPool.token1.symbol,
         }}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
+
+      {/* Add PoolVisualization component */}
+      {reserves && (
+        <PoolVisualization
+          token0={{
+            address: selectedPool.token0.address,
+            symbol: selectedPool.token0.symbol,
+          }}
+          token1={{
+            address: selectedPool.token1.address,
+            symbol: selectedPool.token1.symbol,
+          }}
+          reserves={[formatReserves(reserves[0]), formatReserves(reserves[1])]}
+          activeTab={activeTab}
+          swapFromToken="token0"
+          poolAddress={selectedPool.address}
+        />
+      )}
     </div>
   );
 };

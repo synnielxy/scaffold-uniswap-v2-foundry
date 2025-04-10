@@ -2324,6 +2324,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.4
+  resolution: "@kurkle/color@npm:0.3.4"
+  checksum: b95c6abe0241ba1745b3c84de3b464296b95ce577110b54f46e6c6dcc9a0966491533df43812bd6c66f92cf818e385d1390b280cd5851d4afb52fc37f8a6c0b9
+  languageName: node
+  linkType: hard
+
 "@leichtgewicht/ip-codec@npm:^2.0.1":
   version: 2.0.5
   resolution: "@leichtgewicht/ip-codec@npm:2.0.5"
@@ -6692,6 +6699,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chart.js@npm:^4.4.8":
+  version: 4.4.8
+  resolution: "chart.js@npm:4.4.8"
+  dependencies:
+    "@kurkle/color": ^0.3.0
+  checksum: f6d7532f3f014d8d28d5e2a95c2aac362d22d2bd09fcdabcb7529ac21affc81670fc6920f78400d97ca80c13f274df7036c54b76340efbb4b0be63ced13c602a
+  languageName: node
+  linkType: hard
+
+"chartjs-adapter-date-fns@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "chartjs-adapter-date-fns@npm:3.0.0"
+  peerDependencies:
+    chart.js: ">=2.8.0"
+    date-fns: ">=2.0.0"
+  checksum: c39bfdf490749faa589fba6e0dc0a2c5a467a5f06aaa52c5180e10fd9c83414807a064f6950538448bffee354c8064c0ce9d957bccbf2048e7ee2257aa95f138
+  languageName: node
+  linkType: hard
+
 "chokidar@npm:4.0.0":
   version: 4.0.0
   resolution: "chokidar@npm:4.0.0"
@@ -7190,6 +7216,13 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.21.0
   checksum: f7be01523282e9bb06c0cd2693d34f245247a29098527d4420628966a2d9aad154bd0e90a6b1cf66d37adcb769cd108cf8a7bd49d76db0fb119af5cdd13644f4
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: fb681b242cccabed45494468f64282a7d375ea970e0adbcc5dcc92dcb7aba49b2081c2c9739d41bf71ce89ed68dd73bebfe06ca35129490704775d091895710b
   languageName: node
   linkType: hard
 
@@ -13110,6 +13143,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-chartjs-2@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "react-chartjs-2@npm:5.3.0"
+  peerDependencies:
+    chart.js: ^4.1.1
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: af05212a1e30a98379959dd2cd4670ff29ca6e9b1ad5d54d73ddc4336f463567fb0386f33dbc9de01ea724ac75dd0b7a8374e3936a91c7751b7c20c19ef3e920
+  languageName: node
+  linkType: hard
+
 "react-copy-to-clipboard@npm:~5.1.0":
   version: 5.1.0
   resolution: "react-copy-to-clipboard@npm:5.1.0"
@@ -13654,8 +13697,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "se-2@workspace:."
   dependencies:
+    chart.js: ^4.4.8
+    chartjs-adapter-date-fns: ^3.0.0
+    date-fns: ^4.1.0
     husky: ~9.1.6
     lint-staged: ~13.2.2
+    react-chartjs-2: ^5.3.0
   languageName: unknown
   linkType: soft
 
