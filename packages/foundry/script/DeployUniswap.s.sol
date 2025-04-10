@@ -7,6 +7,7 @@ import "../contracts/UniswapV2Router02.sol";
 import "../contracts/interfaces/IERC20.sol";
 import "../contracts/test/TestERC20.sol";
 import "../contracts/test/WETH9.sol";
+import "../contracts/interfaces/IUniswapV2Pair.sol";
 
 contract DeployMyContract is Script {
     // WETH addresses for different networks
@@ -166,6 +167,17 @@ contract DeployMyContract is Script {
 
         // Add initial liquidity
         setupInitialLiquidity(router, tokens, pairs, deployer);
+
+        console.log("\n=== Pool reserves ===");
+        for (uint i = 0; i < pairs.length; i++) {
+            (uint112 reserve0, uint112 reserve1,) = IUniswapV2Pair(pairs[i]).getReserves();
+            console.log("Pool %d: %s", i + 1, pairs[i]);
+            console.log("  Token0: %s", address(tokens[i]));
+            console.log("  Token1: %s", address(tokens[(i + 1) % tokens.length]));
+            console.log("  Reserve0: %d", reserve0 / 1e18);
+            console.log("  Reserve1: %d", reserve1 / 1e18);
+            console.log("---");
+        }
 
         // Test swap
         testSwap(router, tokens[0], tokens[1], deployer);

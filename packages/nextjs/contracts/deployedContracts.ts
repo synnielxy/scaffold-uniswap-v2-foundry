@@ -148,11 +148,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744239946.json",
+      deploymentFile: "run-1744308593.json",
       deploymentScript: "Deploy.s.sol",
     },
     WETH9: {
-      address: "0xd53aa20bf50628a4dc635e432eaeb899cf4f1300",
+      address: "0x9b755b1bedd5dbfbe18fd2d9a0f41de0d7d32eb4",
       abi: [
         {
           type: "receive",
@@ -390,11 +390,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744239946.json",
+      deploymentFile: "run-1744308593.json",
       deploymentScript: "Deploy.s.sol",
     },
     UniswapV2Factory: {
-      address: "0xbf5ff1a6ceeada8a6cc0fe678793b4df8e9db67d",
+      address: "0xd3ec50bc85ed95df041b016bee0289b13836f8cd",
       abi: [
         {
           type: "constructor",
@@ -572,11 +572,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744239946.json",
+      deploymentFile: "run-1744308593.json",
       deploymentScript: "Deploy.s.sol",
     },
     UniswapV2Router02: {
-      address: "0x3f3e6e2d8367b9fb93b0a4fb7c480006d48b222b",
+      address: "0x9315653f5c852f18cf64fb16b74c2da2de5398b9",
       abi: [
         {
           type: "constructor",
@@ -1551,11 +1551,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744239946.json",
+      deploymentFile: "run-1744308593.json",
       deploymentScript: "Deploy.s.sol",
     },
     TestERC20: {
-      address: "0x7caed286b41df65bd6c03d0cb02629487ddfe234",
+      address: "0x694b9d20ee80e474c69f7ec66904c591b9c41454",
       abi: [
         {
           type: "constructor",
@@ -1820,7 +1820,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1744239946.json",
+      deploymentFile: "run-1744308593.json",
       deploymentScript: "Deploy.s.sol",
     },
   },
