@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { routerAddress } from "../../configs/pools";
 import { getContract, parseEther, parseUnits } from "viem";
 import { useAccount, useReadContract, useWalletClient, useWriteContract } from "wagmi";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
@@ -45,8 +46,8 @@ const PoolOperations = ({ poolAddress, token0, token1, activeTab, onTabChange }:
   const [loading, setLoading] = useState(false);
   const [swapDirection, setSwapDirection] = useState<"token0ToToken1" | "token1ToToken0">("token0ToToken1");
 
-  const { data: routerInfo } = useDeployedContractInfo("UniswapV2Router02");
-  const routerAddress = routerInfo?.address;
+  // const { data: routerInfo } = useDeployedContractInfo("UniswapV2Router02");
+  // const routerAddress = routerInfo?.address;
 
   const { writeContract: approveToken0 } = useWriteContract();
   const { writeContract: approveToken1 } = useWriteContract();
@@ -63,6 +64,7 @@ const PoolOperations = ({ poolAddress, token0, token1, activeTab, onTabChange }:
   }) as { data: bigint | undefined };
 
   const handleDeposit = async () => {
+    console.log("Deposit called", amount0, amount1, connectedAddress, routerAddress);
     if (!amount0 || !amount1 || !connectedAddress || !routerAddress) return;
 
     setLoading(true);

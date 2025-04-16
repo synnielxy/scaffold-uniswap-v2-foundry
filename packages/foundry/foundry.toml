@@ -38,7 +38,7 @@ scrollSepolia = "https://sepolia-rpc.scroll.io"
 scroll = "https://rpc.scroll.io"
 pgn = "https://rpc.publicgoods.network"
 pgnTestnet = "https://sepolia.publicgoods.network"
-
+tenderly = "https://virtual.mainnet.rpc.tenderly.co/0a6e87f0-69dc-4d63-a009-c16ab208bd45"
 
 localhost = "http://127.0.0.1:8545"
 
@@ -46,16 +46,11 @@ localhost = "http://127.0.0.1:8545"
 polygonMumbai = { key = "${ETHERSCAN_API_KEY}" }
 sepolia = { key = "${ETHERSCAN_API_KEY}" }
 
-
-
 [fmt]
 line_length = 120
 tab_width = 4
 quote_style = "double"
 bracket_spacing = true
 int_types = "long"
-
-
-
 
 # See more config options https://book.getfoundry.sh/reference/config/overview

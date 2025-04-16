@@ -44,12 +44,23 @@ const PoolSelector = () => {
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
   // Read reserves from the selected pool
-  const { data: reserves, refetch: refetchReserves } = useContractRead({
+  const {
+    data: reserves,
+    refetch: refetchReserves,
+    error: reservesError,
+  } = useContractRead({
     address: selectedPool.address as `0x${string}`,
     abi: PAIR_ABI,
     functionName: "getReserves",
-    blockNumber: blockNumber,
-  }) as { data: Reserves | undefined; refetch: () => Promise<any> };
+  });
+
+  useEffect(() => {
+    console.log("Reserves data:", reserves);
+    console.log("Selected pool address:", selectedPool.address);
+    if (reservesError) {
+      console.error("Error reading reserves:", reservesError);
+    }
+  }, [reserves, selectedPool.address, reservesError]);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;

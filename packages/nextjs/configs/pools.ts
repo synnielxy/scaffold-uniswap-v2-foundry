@@ -11,75 +11,77 @@ export interface Pool {
   token1: Token;
 }
 
+export const routerAddress = "0x8db4658427ab3bd0dca5df4181e50896d57eb67c";
+
 export const pools: Pool[] = [
   {
     id: 1,
-    address: "0x147dD1C3554DCB733E4aa549c7B57c2A55A873b0",
+    address: "0xF2a762db66df03ffb68B990d02EF15676153D995",
     token0: {
-      name: "Token A",
-      symbol: "TKNA", 
-      address: "0x694B9d20Ee80e474C69F7eC66904C591b9C41454"
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     },
     token1: {
-      name: "Token B",
-      symbol: "TKNB",
-      address: "0x9294e1900C507EFF9f957Dbb48D3FF80649FF6Ae"
-    }
+      name: "USD Coin",
+      symbol: "USDC",
+      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    },
   },
   {
     id: 2,
-    address: "0x5639de257975674e82339ca481bEFecA8e468f22",
+    address: "0xb55cafAd5eBab8C2d7D902cA652bb415bEc1A711",
     token0: {
-      name: "Token B",
-      symbol: "TKNB",
-      address: "0x9294e1900C507EFF9f957Dbb48D3FF80649FF6Ae"
+      name: "USD Coin",
+      symbol: "USDC",
+      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     },
     token1: {
-      name: "Token C", 
-      symbol: "TKNC",
-      address: "0x5288a1798A3DC0E90Ff608011fE029C6Ef693b63"
-    }
+      name: "Uniswap",
+      symbol: "UNI",
+      address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+    },
   },
   {
     id: 3,
-    address: "0xAe389Cccdb1772acB8C8C8fD2ABC32157B1ec5aD",
+    address: "0xf6E89cE0CeC6b87dDD9c5E7E8B7Cd4a2bcb03E27",
     token0: {
-      name: "Token C",
-      symbol: "TKNC",
-      address: "0x5288a1798A3DC0E90Ff608011fE029C6Ef693b63"
+      name: "Uniswap",
+      symbol: "UNI",
+      address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
     },
     token1: {
-      name: "Token D",
-      symbol: "TKND",
-      address: "0x395A2A16b873d6E902e31F1e2B913A41B2e8cF95"
-    }
+      name: "Dai Stablecoin",
+      symbol: "DAI",
+      address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    },
   },
   {
     id: 4,
-    address: "0xE469dA5800b4404B4C2F8205Ed356DcCE9C8Aaeb",
+    address: "0x1E66d6eA1F8c067623C76fC85507eD1184cc6f9E",
     token0: {
-      name: "Token D",
-      symbol: "TKND",
-      address: "0x395A2A16b873d6E902e31F1e2B913A41B2e8cF95"
+      name: "Dai Stablecoin",
+      symbol: "DAI",
+      address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
     },
     token1: {
-      name: "Token E",
-      symbol: "TKNE",
-      address: "0x34E116748b003841786cBe90911e1F8ad7b8e55e"
-    }
+      name: "Chainlink",
+      symbol: "LINK",
+      address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    },
   },
   {
     id: 5,
-    address: "0x9765E5ED4E6194f9c429bf5079a0bE135b152182",
+    address: "0x190eDb1Da757A9036A0aC590af3975207fE9E753",
     token0: {
-      name: "Token E",
-      symbol: "TKNE",
-      address: "0x34E116748b003841786cBe90911e1F8ad7b8e55e"
+      name: "Chainlink",
+      symbol: "LINK",
+      address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
     },
     token1: {
-      name: "Token A",
-      symbol: "TKNA",
-      address: "0x694B9d20Ee80e474C69F7eC66904C591b9C41454"
-    }
-  }
-]
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
+  },
+];
