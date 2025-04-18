@@ -84,7 +84,6 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
               }
 
               const { amount0In, amount1In, amount0Out, amount1Out } = args;
-              console.log("Swap amounts:", { amount0In, amount1In, amount0Out, amount1Out });
 
               // Calculate price based on reserves
               const price = reserves[0] > 0 ? Number(reserves[1]) / Number(reserves[0]) : 0;

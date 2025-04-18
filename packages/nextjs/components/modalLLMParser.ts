@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 
+
 // Define the model name and API configuration
 const MODEL_NAME = "neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16";
 const API_KEY = "neu-3e21der1trt341!f";
@@ -13,16 +14,20 @@ const client = new OpenAI({
 });
 
 // Define the response type
-interface SwapResponse {
+interface OperationResponse {
   function: string;
   arguments: {
-    amountIn: string;
-    tokenIn: string;
-    tokenOut: string;
+    amountIn?: string;
+    tokenIn?: string;
+    tokenOut?: string;
+    tokenA?: string;
+    tokenB?: string;
+    amountADesired?: string;
+    amountBDesired?: string;
   };
 }
 
-export const parseWithModalLLM = async (inputText: string): Promise<SwapResponse | null> => {
+export const parseWithModalLLM = async (inputText: string): Promise<OperationResponse | null> => {
   try {
     const completion = await client.chat.completions.create({
       model: MODEL_NAME,
@@ -32,11 +37,22 @@ export const parseWithModalLLM = async (inputText: string): Promise<SwapResponse
           content: `You are a helpful assistant that converts natural language instructions about Uniswap V2 operations into structured function calls.
           For swap operations, convert them into the following format:
           {
-            "function": "swap_exact_tokens_for_tokens",
+            "function": "swapExactTokensForTokens",
             "arguments": {
               "amountIn": <number>,
               "tokenIn": "<token symbol>",
               "tokenOut": "<token symbol>"
+            }
+          }
+          
+          For deposit operations, convert them into the following format:
+          {
+            "function": "addLiquidity",
+            "arguments": {
+              "tokenA": "<token symbol>",
+              "tokenB": "<token symbol>",
+              "amountADesired": <number>,
+              "amountBDesired": <number>
             }
           }
           
@@ -67,7 +83,7 @@ export const parseWithModalLLM = async (inputText: string): Promise<SwapResponse
       cleanedResponse = cleanedResponse.trim();
 
       // Parse the response as JSON
-      const result = JSON.parse(cleanedResponse) as SwapResponse;
+      const result = JSON.parse(cleanedResponse) as OperationResponse;
       return result;
     } catch (error) {
       console.error("Error parsing LLM response:", error);

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { pools } from "../configs/pools";
 import { parseWithModalLLM } from "./modalLLMParser";
@@ -28,7 +29,13 @@ type RedeemInstruction = {
   amount: TokenAmount;
 };
 
-type StructuredInstruction = SwapInstruction | DepositInstruction | RedeemInstruction;
+type AddLiquidityInstruction = {
+  type: "addLiquidity";
+  tokenA: TokenAmount;
+  tokenB: TokenAmount;
+};
+
+type StructuredInstruction = SwapInstruction | DepositInstruction | RedeemInstruction | AddLiquidityInstruction;
 
 // Get all unique tokens from pools
 const getAllTokens = () => {
@@ -101,6 +108,22 @@ const NaturalLanguageInterface = () => {
   const { data: routerInfo } = useDeployedContractInfo("UniswapV2Router02");
   const routerAddress = routerInfo?.address;
 
+  const commonCommands = [
+    { value: "", label: "Select a command or type your own" },
+    { value: "swap 100 TKNA for TKNB", label: "Swap 100 TKNA for TKNB" },
+    { value: "swap 1 TKNB for TKNA", label: "Swap 1 TKNB for TKNA" },
+    { value: "add 100 TKNA and 0.1 TKNB to liquidity", label: "Add 100 TKNA and 0.1 TKNB to liquidity" },
+    { value: "add 0.5 TKNA and 1000 TKNB to liquidity", label: "Add 0.5 TKNA and 1000 TKNB to liquidity" },
+  ];
+
+  const handleCommandSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setInput(e.target.value);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
   const validateNetwork = () => {
     if (!chainId) {
       throw new Error("Please connect to a network");
@@ -125,70 +148,170 @@ const NaturalLanguageInterface = () => {
       if (!llmResponse) {
         throw new Error("Failed to process natural language");
       }
+      console.log(llmResponse);
+      if (llmResponse.function === "swapExactTokensForTokens") {
+        if (!llmResponse.arguments.amountIn || !llmResponse.arguments.tokenIn || !llmResponse.arguments.tokenOut) {
+          throw new Error("Missing required arguments for swap");
+        }
 
-      // Convert LLM response to our structured representation
-      const parsedInstruction: StructuredInstruction = {
-        type: "swap",
-        from: {
-          amount: llmResponse.arguments.amountIn,
-          token: llmResponse.arguments.tokenIn,
-        },
-        to: llmResponse.arguments.tokenOut,
-      };
-
-      // Step 2: Convert SR to contract call
-      const tokenIn = getTokenAddress(parsedInstruction.from.token);
-      const tokenOut = getTokenAddress(parsedInstruction.to);
-      const amountIn = parseAmount(parsedInstruction.from.amount);
-
-      if (!routerAddress) {
-        throw new Error("Router address not found");
-      }
-
-      // Step 3: Execute the contract calls
-      // First approve the router to spend tokens
-      await approveToken({
-        address: tokenIn as `0x${string}`,
-        abi: ERC20_ABI,
-        functionName: "approve",
-        args: [routerAddress, amountIn],
-      });
-
-      // Wait for approval
-      await new Promise(resolve => setTimeout(resolve, 5000));
-
-      // Then perform the swap
-      const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
-      await swapTokens({
-        address: routerAddress,
-        abi: [
-          {
-            inputs: [
-              { name: "amountIn", type: "uint256" },
-              { name: "amountOutMin", type: "uint256" },
-              { name: "path", type: "address[]" },
-              { name: "to", type: "address" },
-              { name: "deadline", type: "uint256" },
-            ],
-            name: "swapExactTokensForTokens",
-            outputs: [{ name: "amounts", type: "uint256[]" }],
-            stateMutability: "nonpayable",
-            type: "function",
+        // Convert LLM response to our structured representation
+        const parsedInstruction: SwapInstruction = {
+          type: "swap",
+          from: {
+            amount: llmResponse.arguments.amountIn,
+            token: llmResponse.arguments.tokenIn,
           },
-        ],
-        functionName: "swapExactTokensForTokens",
-        args: [
-          amountIn,
-          (amountIn * BigInt(95)) / BigInt(100), // 5% slippage
-          [tokenIn, tokenOut],
-          address,
-          BigInt(deadline),
-        ],
-      });
+          to: llmResponse.arguments.tokenOut,
+        };
 
-      setSuccessMessage(
-        `Successfully swapped ${parsedInstruction.from.amount} ${parsedInstruction.from.token} for ${parsedInstruction.to}`,
-      );
+        // Step 2: Convert SR to contract call
+        const tokenIn = getTokenAddress(parsedInstruction.from.token);
+        const tokenOut = getTokenAddress(parsedInstruction.to);
+        const amountIn = parseAmount(parsedInstruction.from.amount);
+
+        if (!routerAddress) {
+          throw new Error("Router address not found");
+        }
+
+        // Step 3: Execute the contract calls
+        // First approve the router to spend tokens
+        await approveToken({
+          address: tokenIn as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [routerAddress, amountIn],
+        });
+
+        // Wait for approval
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Then perform the swap
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+        await swapTokens({
+          address: routerAddress,
+          abi: [
+            {
+              inputs: [
+                { name: "amountIn", type: "uint256" },
+                { name: "amountOutMin", type: "uint256" },
+                { name: "path", type: "address[]" },
+                { name: "to", type: "address" },
+                { name: "deadline", type: "uint256" },
+              ],
+              name: "swapExactTokensForTokens",
+              outputs: [{ name: "amounts", type: "uint256[]" }],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
+          functionName: "swapExactTokensForTokens",
+          args: [
+            amountIn,
+            (amountIn * BigInt(95)) / BigInt(100), // 5% slippage
+            [tokenIn, tokenOut],
+            address,
+            BigInt(deadline),
+          ],
+        });
+
+        setSuccessMessage(
+          `Successfully swapped ${parsedInstruction.from.amount} ${parsedInstruction.from.token} for ${parsedInstruction.to}`,
+        );
+      } else if (llmResponse.function === "addLiquidity") {
+        if (
+          !llmResponse.arguments.amountADesired ||
+          !llmResponse.arguments.tokenA ||
+          !llmResponse.arguments.amountBDesired ||
+          !llmResponse.arguments.tokenB
+        ) {
+          throw new Error("Missing required arguments for adding liquidity");
+        }
+
+        // Convert LLM response to our structured representation
+        const parsedInstruction: AddLiquidityInstruction = {
+          type: "addLiquidity",
+          tokenA: {
+            amount: llmResponse.arguments.amountADesired,
+            token: llmResponse.arguments.tokenA,
+          },
+          tokenB: {
+            amount: llmResponse.arguments.amountBDesired,
+            token: llmResponse.arguments.tokenB,
+          },
+        };
+
+        // Step 2: Convert SR to contract call
+        const tokenA = getTokenAddress(parsedInstruction.tokenA.token);
+        const tokenB = getTokenAddress(parsedInstruction.tokenB.token);
+        const amountA = parseAmount(parsedInstruction.tokenA.amount);
+        const amountB = parseAmount(parsedInstruction.tokenB.amount);
+
+        if (!routerAddress) {
+          throw new Error("Router address not found");
+        }
+
+        // Step 3: Execute the contract calls
+        // First approve the router to spend both tokens
+        await approveToken({
+          address: tokenA as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [routerAddress, amountA],
+        });
+
+        await approveToken({
+          address: tokenB as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [routerAddress, amountB],
+        });
+
+        // Wait for approvals
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Then add liquidity
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+        await swapTokens({
+          address: routerAddress,
+          abi: [
+            {
+              inputs: [
+                { name: "tokenA", type: "address" },
+                { name: "tokenB", type: "address" },
+                { name: "amountADesired", type: "uint256" },
+                { name: "amountBDesired", type: "uint256" },
+                { name: "amountAMin", type: "uint256" },
+                { name: "amountBMin", type: "uint256" },
+                { name: "to", type: "address" },
+                { name: "deadline", type: "uint256" },
+              ],
+              name: "addLiquidity",
+              outputs: [
+                { name: "amountA", type: "uint256" },
+                { name: "amountB", type: "uint256" },
+                { name: "liquidity", type: "uint256" },
+              ],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
+          functionName: "addLiquidity",
+          args: [
+            tokenA,
+            tokenB,
+            amountA,
+            amountB,
+            (amountA * BigInt(95)) / BigInt(100), // 5% slippage
+            (amountB * BigInt(95)) / BigInt(100), // 5% slippage
+            address,
+            BigInt(deadline),
+          ],
+        });
+
+        setSuccessMessage(
+          `Successfully added liquidity with ${parsedInstruction.tokenA.amount} ${parsedInstruction.tokenA.token} and ${parsedInstruction.tokenB.amount} ${parsedInstruction.tokenB.token}`,
+        );
+      }
     } catch (error) {
       console.error("Error processing instruction:", error);
       setError(error instanceof Error ? error.message : "An unknown error occurred");
@@ -206,12 +329,19 @@ const NaturalLanguageInterface = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-control">
+            <select className="select select-bordered w-full mb-2" value={input} onChange={handleCommandSelect}>
+              {commonCommands.map((cmd, index) => (
+                <option key={index} value={cmd.value}>
+                  {cmd.label}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
-              placeholder="Enter your command..."
+              placeholder="Or type your own command..."
               className="input input-bordered w-full"
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={handleInputChange}
             />
           </div>
           <button type="submit" className="btn btn-primary w-full" disabled={!address || isProcessing || !chainId}>
