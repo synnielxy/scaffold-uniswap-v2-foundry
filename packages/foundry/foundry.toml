@@ -38,7 +38,7 @@ scrollSepolia = "https://sepolia-rpc.scroll.io"
 scroll = "https://rpc.scroll.io"
 pgn = "https://rpc.publicgoods.network"
 pgnTestnet = "https://sepolia.publicgoods.network"
-tenderly = "https://virtual.mainnet.rpc.tenderly.co/0a6e87f0-69dc-4d63-a009-c16ab208bd45"
+tenderly = "https://sepolia.gateway.tenderly.co/3LHjq0femh1vQGSzIVMCy5"
 
 localhost = "http://127.0.0.1:8545"
 

@@ -15,9 +15,8 @@ const scaffoldConfig = {
   // The networks on which your DApp is live
   targetNetworks: [
     {
-      id: 1, // Mainnet
-      name: "Mainnet",
-      network: "mainnet",
+      id: 11155111, // Sepolia
+      name: "Sepolia",
       nativeCurrency: {
         name: "Ether",
         symbol: "ETH",
@@ -25,16 +24,16 @@ const scaffoldConfig = {
       },
       rpcUrls: {
         default: {
-          http: [process.env.NEXT_PUBLIC_RPC_URL || ""],
+          http: ["https://sepolia.gateway.tenderly.co/3LHjq0femh1vQGSzIVMCy5"],
         },
         public: {
-          http: [process.env.NEXT_PUBLIC_RPC_URL || ""],
+          http: ["https://sepolia.gateway.tenderly.co/3LHjq0femh1vQGSzIVMCy5"],
         },
       },
       blockExplorers: {
         default: {
           name: "Etherscan",
-          url: "https://etherscan.io",
+          url: "https://sepolia.etherscan.io",
         },
       },
     },
@@ -52,7 +51,7 @@ const scaffoldConfig = {
   // If you want to use a different RPC for a specific network, you can add it here.
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
-    [1]: process.env.NEXT_PUBLIC_RPC_URL || "",
+    [11155111]: "https://sepolia.gateway.tenderly.co/3LHjq0femh1vQGSzIVMCy5",
   },
 
   // This is ours WalletConnect's default project ID.
