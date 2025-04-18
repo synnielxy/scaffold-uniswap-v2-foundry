@@ -26,6 +26,10 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/debug",
     icon: <BugAntIcon className="h-4 w-4" />,
   },
+  {
+    label: "Natural Language",
+    href: "/natural-language",
+  },
 ];
 
 export const HeaderMenuLinks = () => {

@@ -1,15 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
-import { parseEther } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import PoolSelector from "~~/components/PoolSelector";
-import { Address } from "~~/components/scaffold-eth";
-import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-
 
 const Home: NextPage = () => {
   return (
