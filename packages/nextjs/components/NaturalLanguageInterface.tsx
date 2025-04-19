@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { pools } from "../configs/pools";
 import { parseWithModalLLM } from "./modalLLMParser";
+import PoolDataAnalysis from "./uniswap/PoolDataAnalysis";
 import { parseEther } from "viem";
 import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
@@ -100,6 +101,7 @@ const NaturalLanguageInterface = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
   const { address } = useAccount();
   const chainId = useChainId();
   const { writeContract: approveToken } = useWriteContract();
@@ -112,9 +114,24 @@ const NaturalLanguageInterface = () => {
     { value: "", label: "Select a command or type your own" },
     { value: "swap 100 TKNA for TKNB", label: "Swap 100 TKNA for TKNB" },
     { value: "swap 1 TKNB for TKNA", label: "Swap 1 TKNB for TKNA" },
-    { value: "add 100 TKNA and 0.1 TKNB to liquidity", label: "Add 100 TKNA and 0.1 TKNB to liquidity" },
-    { value: "add 0.5 TKNA and 1000 TKNB to liquidity", label: "Add 0.5 TKNA and 1000 TKNB to liquidity" },
+    { value: "add 100 TKNA and 100 TKNB to liquidity", label: "Add 100 TKNA and 100 TKNB to liquidity" },
+    { value: "add 50 TKNA and 50 TKNB to liquidity", label: "Add 50 TKNA and 50 TKNB to liquidity" },
+    { value: "what are the reserves of the pool TKNB-TKNA", label: "Check pool reserves" },
+    { value: "how many swaps have there been today", label: "Check today's swaps" },
+    { value: "what is the current price of TKNB in TKNA", label: "Check current price" },
+    { value: "show me the price history of TKNB-TKNA over the past week", label: "View price history (1 week)" },
+    { value: "what is the total liquidity in the TKNB-TKNA pool", label: "Check total liquidity" },
+    { value: "what is the trading volume in the last 24 hours", label: "Check 24h volume" },
+    // Challenging commands that might fail
+    { value: "predict the price of TKNB in TKNA next week", label: "Predict future price (will fail)" },
+    { value: "what is the optimal amount to swap for maximum profit", label: "Find optimal swap (will fail)" },
+    { value: "show me all arbitrage opportunities in the pool", label: "Find arbitrage (will fail)" },
+    { value: "what is the impermanent loss if I add liquidity now", label: "Calculate IL (will fail)" },
+    { value: "what is the best time to swap based on historical data", label: "Find best time (will fail)" },
   ];
+
+  const [llmOutput, setLlmOutput] = useState<string>("");
+  const [llmError, setLlmError] = useState<string>("");
 
   const handleCommandSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setInput(e.target.value);
@@ -140,15 +157,42 @@ const NaturalLanguageInterface = () => {
     setIsProcessing(true);
     setError(null);
     setSuccessMessage(null);
+    setAnalysisResult(null);
+    setLlmOutput("");
+    setLlmError("");
+
     try {
       validateNetwork();
 
       // Step 1: Call Modal LLM to convert NLI to structured representation
       const llmResponse = await parseWithModalLLM(input);
+      setLlmOutput(JSON.stringify(llmResponse, null, 2));
+
       if (!llmResponse) {
         throw new Error("Failed to process natural language");
       }
-      console.log(llmResponse);
+
+      // Check for challenging commands that should fail
+      if (
+        input.includes("predict") ||
+        input.includes("optimal") ||
+        input.includes("arbitrage") ||
+        input.includes("impermanent loss") ||
+        input.includes("best time")
+      ) {
+        setLlmError(
+          "This type of analysis requires complex calculations and predictions that are beyond the current capabilities. The LLM can only handle historical data and current state analysis.",
+        );
+        return;
+      }
+
+      // Check if it's a data analysis request
+      if ("type" in llmResponse) {
+        setAnalysisResult(llmResponse);
+        return;
+      }
+
+      // Handle operation requests
       if (llmResponse.function === "swapExactTokensForTokens") {
         if (!llmResponse.arguments.amountIn || !llmResponse.arguments.tokenIn || !llmResponse.arguments.tokenOut) {
           throw new Error("Missing required arguments for swap");
@@ -214,9 +258,7 @@ const NaturalLanguageInterface = () => {
           ],
         });
 
-        setSuccessMessage(
-          `Successfully swapped ${parsedInstruction.from.amount} ${parsedInstruction.from.token} for ${parsedInstruction.to}`,
-        );
+        setSuccessMessage(`Command executed successfully! Please check your wallet for the transaction details.`);
       } else if (llmResponse.function === "addLiquidity") {
         if (
           !llmResponse.arguments.amountADesired ||
@@ -308,9 +350,7 @@ const NaturalLanguageInterface = () => {
           ],
         });
 
-        setSuccessMessage(
-          `Successfully added liquidity with ${parsedInstruction.tokenA.amount} ${parsedInstruction.tokenA.token} and ${parsedInstruction.tokenB.amount} ${parsedInstruction.tokenB.token}`,
-        );
+        setSuccessMessage(`Command executed successfully! Please check your wallet for the transaction details.`);
       }
     } catch (error) {
       console.error("Error processing instruction:", error);
@@ -325,7 +365,6 @@ const NaturalLanguageInterface = () => {
       <div className="bg-base-200 rounded-lg p-6 shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Natural Language Interface</h2>
         <p className="text-sm text-gray-500 mb-4">Available tokens: {Object.keys(TOKEN_ADDRESSES).join(", ")}</p>
-        {chainId && <p className="text-sm text-gray-500 mb-4">Current network chain ID: {chainId}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-control">
@@ -366,6 +405,37 @@ const NaturalLanguageInterface = () => {
           <div className="mt-4 p-4 bg-success text-success-content rounded-lg">
             <p className="font-bold">Success!</p>
             <p>{successMessage}</p>
+          </div>
+        )}
+
+        {llmOutput && (
+          <div className="mt-4 p-4 bg-base-300 rounded-lg">
+            <p className="font-bold mb-2">LLM Output:</p>
+            <pre className="text-sm overflow-x-auto">{llmOutput}</pre>
+          </div>
+        )}
+
+        {llmError && (
+          <div className="mt-4 p-4 bg-warning text-warning-content rounded-lg">
+            <p className="font-bold">Analysis Limitation:</p>
+            <p>{llmError}</p>
+          </div>
+        )}
+
+        {analysisResult && (
+          <div className="mt-4">
+            <PoolDataAnalysis
+              poolAddress={pools[0].address as `0x${string}`}
+              token0={{
+                symbol: pools[0].token0.symbol,
+                decimals: 18,
+              }}
+              token1={{
+                symbol: pools[0].token1.symbol,
+                decimals: 18,
+              }}
+              analysisRequest={analysisResult}
+            />
           </div>
         )}
       </div>

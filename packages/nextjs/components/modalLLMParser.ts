@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 
-
 // Define the model name and API configuration
 const MODEL_NAME = "neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16";
 const API_KEY = "neu-3e21der1trt341!f";
@@ -27,14 +26,27 @@ interface OperationResponse {
   };
 }
 
-export const parseWithModalLLM = async (inputText: string): Promise<OperationResponse | null> => {
+// Define the data analysis response type
+interface DataAnalysisResponse {
+  type: "reserves" | "swaps" | "price" | "price_history" | "liquidity" | "volume" | "price_impact";
+  pool: string;
+  timeframe?: string;
+  token0?: string;
+  token1?: string;
+  period?: "hour" | "day" | "week" | "month";
+}
+
+export const parseWithModalLLM = async (
+  inputText: string,
+): Promise<OperationResponse | DataAnalysisResponse | null> => {
   try {
     const completion = await client.chat.completions.create({
       model: MODEL_NAME,
       messages: [
         {
           role: "system",
-          content: `You are a helpful assistant that converts natural language instructions about Uniswap V2 operations into structured function calls.
+          content: `You are a helpful assistant that converts natural language instructions about Uniswap V2 operations into structured function calls or data analysis requests.
+
           For swap operations, convert them into the following format:
           {
             "function": "swapExactTokensForTokens",
@@ -55,6 +67,25 @@ export const parseWithModalLLM = async (inputText: string): Promise<OperationRes
               "amountBDesired": <number>
             }
           }
+
+          For data analysis questions, convert them into the following format:
+          {
+            "type": "reserves" | "swaps" | "price" | "price_history" | "liquidity" | "volume" | "price_impact",
+            "pool": "<token0>-<token1>",
+            "timeframe": "<timeframe>" (optional),
+            "token0": "<token symbol>" (optional),
+            "token1": "<token symbol>" (optional),
+            "period": "hour" | "day" | "week" | "month" (optional)
+          }
+
+          Examples of data analysis questions:
+          - "what are the reserves of the tether-eth pool" -> {"type": "reserves", "pool": "tether-eth"}
+          - "how many swaps have there been so far today" -> {"type": "swaps", "timeframe": "today"}
+          - "what is the current price of eth in usdc" -> {"type": "price", "pool": "eth-usdc"}
+          - "show me the price history of eth-usdc over the past week" -> {"type": "price_history", "pool": "eth-usdc", "period": "week"}
+          - "what is the total liquidity in the eth-usdc pool" -> {"type": "liquidity", "pool": "eth-usdc"}
+          - "what is the trading volume in the last 24 hours" -> {"type": "volume", "timeframe": "24h"}
+          - "what would be the price impact of swapping 1000 usdc for eth" -> {"type": "price_impact", "pool": "eth-usdc", "amount": "1000", "token": "usdc"}
           
           Only respond with the JSON object, no additional text or explanation.`,
         },
@@ -83,7 +114,7 @@ export const parseWithModalLLM = async (inputText: string): Promise<OperationRes
       cleanedResponse = cleanedResponse.trim();
 
       // Parse the response as JSON
-      const result = JSON.parse(cleanedResponse) as OperationResponse;
+      const result = JSON.parse(cleanedResponse) as OperationResponse | DataAnalysisResponse;
       return result;
     } catch (error) {
       console.error("Error parsing LLM response:", error);

@@ -11,9 +11,7 @@ interface TokenInfo {
 interface PoolVisualizationProps {
   token0: TokenInfo;
   token1: TokenInfo;
-  reserves: [string, string];
-  activeTab: "deposit" | "redeem" | "swap";
-  swapFromToken: "token0" | "token1";
+  reserves: [string, string, number];
   isLoading?: boolean;
   poolAddress: `0x${string}`;
 }
@@ -55,8 +53,10 @@ const PoolVisualization: React.FC<PoolVisualizationProps> = ({
       return reserve;
     }
   };
+
   const humanizedReserve0 = formatReserve(reserves[0], token0.decimals);
   const humanizedReserve1 = formatReserve(reserves[1], token1.decimals);
+
   return (
     <div className="bg-base-100 p-6 rounded-xl shadow-md">
       <h3 className="text-xl font-bold mb-4 flex justify-between items-center">

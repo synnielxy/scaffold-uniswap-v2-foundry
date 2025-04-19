@@ -39,7 +39,6 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
       try {
         // Get the current block number
         const currentBlock = await publicClient.getBlockNumber();
-
         // Query all blocks from the beginning
         const fromBlock = BigInt(0);
 
@@ -87,7 +86,6 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
 
               // Calculate price based on reserves
               const price = reserves[0] > 0 ? Number(reserves[1]) / Number(reserves[0]) : 0;
-              console.log("Calculated price:", price);
 
               return {
                 price,
@@ -105,6 +103,7 @@ const SwapPriceHistoryChart: React.FC<SwapPriceHistoryChartProps> = ({ token0Sym
         );
 
         const validEvents = events.filter((event): event is SwapEvent => event !== null);
+        console.log("Valid events:", validEvents);
         setSwapEvents(validEvents);
       } catch (error) {
         console.error("Error fetching swap events:", error);
